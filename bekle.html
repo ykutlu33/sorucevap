@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonuçlar Bekleniyor...</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
+        body { background: #2c3e50; font-family: 'Varela Round', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; color: white;}
+        .container { background-color: rgba(255, 255, 255, 0.1); padding: 50px; border-radius: 20px; }
+        h1 { font-size: 2.2rem; }
+        p { font-size: 1.2rem; }
+        .cevap { background-color: white; color: #333; padding: 10px; border-radius: 8px; margin-top: 15px; font-weight: bold;}
+    </style>
+</head>
+<body>
+    <div class="container" id="bekleme-ekrani">
+        <h1>Sonuçlar Bekleniyor...</h1>
+        <p>Link sevgiline gönderildi. Cevap verdiğinde sonuçlar burada görünecek.</p>
+    </div>
+
+    <div class="container" id="sonuc-ekrani" style="display:none;">
+        <h1>İşte Cevaplar!</h1>
+        <div id="cevap-listesi"></div>
+    </div>
+
+    <!-- Firebase Kütüphaneleri -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        // Senin özel Firebase anahtarların buraya eklendi.
+        const firebaseConfig = {
+            apiKey: "AIzaSyAP3bZR_QQqJ8LqToEU1mdTtd5rfuoMaVY",
+            authDomain: "sevgili-quizi.firebaseapp.com",
+            databaseURL: "https://sevgili-quizi-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "sevgili-quizi",
+            storageBucket: "sevgili-quizi.firebasestorage.app",
+            messagingSenderId: "753855520594",
+            appId: "1:753855520594:web:0eeb1d98eb3cdc1e21e48b"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        window.onload = function() {
+            const quizId = window.location.hash.substring(1);
+            if (!quizId) {
+                document.body.innerHTML = '<h1>Hatalı Link!</h1>';
+                return;
+            }
+
+            const cevaplarRef = database.ref('quizzes/' + quizId + '/cevaplar');
+            cevaplarRef.on('value', (snapshot) => {
+                const cevaplar = snapshot.val();
+                if (cevaplar) {
+                    database.ref('quizzes/' + quizId).once('value').then((quizSnapshot) => {
+                        const quiz = quizSnapshot.val();
+                        sonuclariGoster(cevaplar, quiz);
+                    });
+                }
+            });
+        };
+
+        function sonuclariGoster(gelenCevaplar, quiz) {
+            document.getElementById('bekleme-ekrani').style.display = 'none';
+            
+            const cevapListesi = document.getElementById('cevap-listesi');
+            cevapListesi.innerHTML = `
+                <h3>Tarih Sorusu:</h3>
+                <p class="cevap">Verdiği Cevap: ${gelenCevaplar.soru1}</p>
+                <h3>${quiz.soru2_metin}</h3>
+                <p class="cevap">Verdiği Cevap: ${quiz.secenekler[gelenCevaplar.soru2]}</p>
+            `;
+            
+            document.getElementById('sonuc-ekrani').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
