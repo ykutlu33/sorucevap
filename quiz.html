@@ -18,7 +18,6 @@
     </style>
 </head>
 <body>
-
     <div class="container" id="quiz-bolumu-1">
         <h1>İlk Soru: İlk Buluşma Tarihimiz?</h1>
         <img src="ana.gif" alt="Ana GIF" class="gif">
@@ -29,8 +28,7 @@
     <div class="container" id="quiz-bolumu-2" style="display:none;">
         <h1 id="soru2-baslik">İkinci Soru Geliyor...</h1>
         <img src="ana.gif" alt="Ana GIF" class="gif">
-        <div id="secenekler-kutusu">
-            </div>
+        <div id="secenekler-kutusu"></div>
     </div>
 
     <div class="container" id="sonuc-container" style="display:none;">
@@ -43,18 +41,20 @@
         let quizVerisi;
         let kullaniciCevaplari = {};
 
-        // Sayfa yüklendiğinde linkteki şifreyi çöz ve quizi hazırla
         window.onload = function() {
             try {
-                // Linkin sonundaki şifreli veriyi al
                 const sifreliVeri = window.location.hash.substring(1);
                 if (!sifreliVeri) throw new Error("Quiz verisi bulunamadı!");
 
-                // Şifreyi çözerek orijinal veriye ulaş
-                const veriStr = atob(sifreliVeri);
+                // --- GÜNCELLEME: Türkçe karakter sorununu çözmek için ---
+                // Önce şifreyi çözerek ara formattaki metni al
+                const cozulmusVeriStr = atob(sifreliVeri);
+                // Sonra bu metni, Türkçe karakterleri destekleyen orijinal haline geri çevir
+                const veriStr = decodeURIComponent(escape(cozulmusVeriStr));
+                // --- GÜNCELLEME SONU ---
+                
                 quizVerisi = JSON.parse(veriStr);
 
-                // İkinci sorunun başlığını ve seçeneklerini hazırla
                 document.getElementById('soru2-baslik').textContent = quizVerisi.soru2_metin;
                 const seceneklerKutusu = document.getElementById('secenekler-kutusu');
                 quizVerisi.secenekler.forEach((secenek, index) => {
@@ -71,7 +71,6 @@
             }
         };
 
-        // İlk sorunun cevabını kontrol et
         function soru1Kontrol() {
             const cevap1 = document.getElementById('cevap-input-1').value;
             if (!cevap1) {
@@ -83,14 +82,12 @@
             document.getElementById('quiz-bolumu-2').style.display = 'block';
         }
 
-        // İkinci sorunun cevabını al ve sonuçları göster
         function soru2Kontrol(secilenIndex) {
             kullaniciCevaplari.soru2 = secilenIndex;
             document.getElementById('quiz-bolumu-2').style.display = 'none';
             sonuclariGoster();
         }
 
-        // Sonuçları ekranda göster
         function sonuclariGoster() {
             const sonucContainer = document.getElementById('sonuc-container');
             const sonucBaslik = document.getElementById('sonuc-baslik');
@@ -100,15 +97,12 @@
             const dogruCevap1 = quizVerisi.soru1_cevap;
             const dogruCevap2_index = parseInt(quizVerisi.soru2_dogru_index);
             
-            // Cevapları karşılaştır
-            if (kullaniciCevaplari.soru1 === dogruCevap1 && kullaniciCevaplari.soru2 === dogruCevap2_index) {
-                // Her şey doğruysa
+            if (kullaniciCevaplari.soru1 === dogruCavap1 && kullaniciCevaplari.soru2 === dogruCevap2_index) {
                 sonucContainer.classList.remove('yanlis');
                 sonucBaslik.textContent = "TEBRİKLER AŞKIM!";
                 sonucMesaj.textContent = "Tüm anılarımızı hatırlamana o kadar sevindim ki... Sen harikasın!";
                 sonucGif.src = 'dogru.gif';
             } else {
-                // En az bir yanlış varsa
                 sonucContainer.classList.add('yanlis');
                 sonucBaslik.textContent = "BİRAZCIK UNUTMUŞUZ SANKİ...";
                 sonucMesaj.textContent = "Olsun, aşkımız her şeyden önemli. Gel birlikte yeni anılar biriktirelim!";
