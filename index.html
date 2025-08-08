@@ -23,17 +23,14 @@
 <body>
     <div class="form-container">
         <h1>Sevgiline Özel Quiz Hazırla</h1>
-        
         <div class="input-group">
             <label for="soru1_cevap">Soru 1: İlk buluşma tarihinizi seçin (Doğru Cevap)</label>
             <input type="date" id="soru1_cevap" required>
         </div>
-
         <div class="input-group">
             <label for="soru2_metin">Soru 2: İkinci soruyu yazın (Örn: O gün üstümde ne vardı?)</label>
             <input type="text" id="soru2_metin" placeholder="Soruyu buraya yazın..." required>
         </div>
-
         <div class="input-group">
             <label>Soru 2'nin Cevap Seçenekleri (Birini doğru cevap olarak işaretleyin)</label>
             <div class="options-container">
@@ -43,15 +40,12 @@
                 <div class="option"><input type="radio" name="dogru_secenek" value="3"> <input type="text" id="secenek4" placeholder="Seçenek 4" required></div>
             </div>
         </div>
-
         <button class="button" onclick="linkOlustur()">Quiz Linkini Oluştur</button>
-
         <div id="link-sonuc">
             <p>Harika! İşte sevgiline göndereceğin link. Kopyalayıp ona gönder:</p>
             <a href="#" id="olusturulan-link" target="_blank"></a>
         </div>
     </div>
-
     <script>
         function linkOlustur() {
             const quizVerisi = {
@@ -65,24 +59,15 @@
                 ],
                 soru2_dogru_index: document.querySelector('input[name="dogru_secenek"]:checked').value
             };
-
             if (!quizVerisi.soru1_cevap || !quizVerisi.soru2_metin || quizVerisi.secenekler.some(s => s === '')) {
                 alert('Lütfen tüm alanları doldurun!');
                 return;
             }
-
             const veriStr = JSON.stringify(quizVerisi);
-            
-            // --- GÜNCELLEME: Türkçe karakter sorununu çözmek için ---
-            // Metni önce tüm karakterleri destekleyen güvenli bir formata dönüştür
-            const guvenliVeriStr = unescape(encodeURIComponent(veriStr));
-            // Sonra bu güvenli metni şifrele
-            const sifreliVeri = btoa(guvenliVeriStr);
-            // --- GÜNCELLEME SONU ---
-
+            // GÜNCELLENMİŞ GÜVENLİ ŞİFRELEME
+            const sifreliVeri = btoa(unescape(encodeURIComponent(veriStr)));
             const anaAdres = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
             const quizLinki = anaAdres + 'quiz.html#' + sifreliVeri;
-
             const linkAlani = document.getElementById('olusturulan-link');
             linkAlani.href = quizLinki;
             linkAlani.textContent = quizLinki;
