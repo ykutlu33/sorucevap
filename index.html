@@ -54,40 +54,59 @@
 
     <script>
         function linkOlustur() {
-            // Formdaki tüm verileri topla
-            const quizVerisi = {
-                soru1_cevap: document.getElementById('soru1_cevap').value,
-                soru2_metin: document.getElementById('soru2_metin').value,
-                secenekler: [
-                    document.getElementById('secenek1').value,
-                    document.getElementById('secenek2').value,
-                    document.getElementById('secenek3').value,
-                    document.getElementById('secenek4').value,
-                ],
-                soru2_dogru_index: document.querySelector('input[name="dogru_secenek"]:checked').value
-            };
+            // --- HATA AYIKLAMA KODLARI EKLENDİ ---
+            console.log("1. 'linkOlustur' fonksiyonu başarıyla çalıştı.");
 
-            // Herhangi bir alan boş mu diye kontrol et
-            if (!quizVerisi.soru1_cevap || !quizVerisi.soru2_metin || quizVerisi.secenekler.some(s => s === '')) {
-                alert('Lütfen tüm alanları doldurun!');
-                return;
+            try {
+                const soru1_cevap_elementi = document.getElementById('soru1_cevap');
+                console.log("2. Tarih elementi bulundu mu?:", soru1_cevap_elementi);
+
+                const soru2_metin_elementi = document.getElementById('soru2_metin');
+                console.log("3. Soru metni elementi bulundu mu?:", soru2_metin_elementi);
+
+                const secenek1_elementi = document.getElementById('secenek1');
+                console.log("4. Seçenek 1 elementi bulundu mu?:", secenek1_elementi);
+                
+                const dogru_secenek_elementi = document.querySelector('input[name="dogru_secenek"]:checked');
+                console.log("5. Doğru seçenek elementi bulundu mu?:", dogru_secenek_elementi);
+
+                const quizVerisi = {
+                    soru1_cevap: soru1_cevap_elementi.value,
+                    soru2_metin: soru2_metin_elementi.value,
+                    secenekler: [
+                        secenek1_elementi.value,
+                        document.getElementById('secenek2').value,
+                        document.getElementById('secenek3').value,
+                        document.getElementById('secenek4').value,
+                    ],
+                    soru2_dogru_index: dogru_secenek_elementi.value
+                };
+
+                console.log("6. Tüm veriler başarıyla toplandı:", quizVerisi);
+
+                if (!quizVerisi.soru1_cevap || !quizVerisi.soru2_metin || quizVerisi.secenekler.some(s => s === '')) {
+                    alert('Lütfen tüm alanları doldurun!');
+                    console.log("HATA: Boş alanlar var, işlem durduruldu.");
+                    return;
+                }
+
+                const veriStr = JSON.stringify(quizVerisi);
+                const sifreliVeri = btoa(veriStr);
+                
+                const anaAdres = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+                const quizLinki = anaAdres + 'quiz.html#' + sifreliVeri;
+
+                console.log("7. Final link başarıyla oluşturuldu:", quizLinki);
+
+                const linkAlani = document.getElementById('olusturulan-link');
+                linkAlani.href = quizLinki;
+                linkAlani.textContent = quizLinki;
+                document.getElementById('link-sonuc').style.display = 'block';
+
+            } catch (hata) {
+                console.error("KRİTİK HATA! Sorun burada:", hata);
+                alert("Beklenmedik bir hata oluştu. Lütfen Geliştirici Konsolu'nu kontrol edin.");
             }
-
-            // Veriyi metne (JSON) çevir
-            const veriStr = JSON.stringify(quizVerisi);
-            // Metni Base64 formatında şifrele
-            const sifreliVeri = btoa(veriStr);
-
-            // Şu anki sayfanın adresini al ve 'quiz.html' ile değiştir
-            const mevcutAdres = window.location.href;
-            const anaAdres = mevcutAdres.substring(0, mevcutAdres.lastIndexOf('/') + 1);
-            const quizLinki = anaAdres + 'quiz.html#' + sifreliVeri;
-
-            // Oluşturulan linki ekranda göster
-            const linkAlani = document.getElementById('olusturulan-link');
-            linkAlani.href = quizLinki;
-            linkAlani.textContent = quizLinki;
-            document.getElementById('link-sonuc').style.display = 'block';
         }
     </script>
 </body>
