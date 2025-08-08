@@ -64,8 +64,12 @@
                 return;
             }
             const veriStr = JSON.stringify(quizVerisi);
-            // GÜNCELLENMİŞ GÜVENLİ ŞİFRELEME
-            const sifreliVeri = btoa(unescape(encodeURIComponent(veriStr)));
+            
+            // --- YENİ VE GÜVENİLİR YÖNTEM ---
+            // btoa() fonksiyonu kaldırıldı. Direkt olarak link için güvenli hale getiriliyor.
+            const sifreliVeri = encodeURIComponent(veriStr);
+            // --- BİTTİ ---
+
             const anaAdres = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
             const quizLinki = anaAdres + 'quiz.html#' + sifreliVeri;
             const linkAlani = document.getElementById('olusturulan-link');
