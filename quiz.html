@@ -41,9 +41,14 @@
             try {
                 const sifreliVeri = window.location.hash.substring(1);
                 if (!sifreliVeri) throw new Error("Quiz verisi bulunamadı!");
-                // GÜNCELLENMİŞ GÜVENLİ ŞİFRE ÇÖZME
-                const veriStr = decodeURIComponent(escape(atob(sifreliVeri)));
+
+                // --- YENİ VE GÜVENİLİR YÖNTEM ---
+                // atob() fonksiyonu kaldırıldı. Direkt olarak linkten gelen veri çözülüyor.
+                const veriStr = decodeURIComponent(sifreliVeri);
+                // --- BİTTİ ---
+                
                 quizVerisi = JSON.parse(veriStr);
+
                 document.getElementById('soru2-baslik').textContent = quizVerisi.soru2_metin;
                 const seceneklerKutusu = document.getElementById('secenekler-kutusu');
                 quizVerisi.secenekler.forEach((secenek, index) => {
