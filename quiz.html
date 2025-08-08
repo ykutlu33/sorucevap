@@ -6,119 +6,123 @@
     <title>Sana Özel Bir Sınav!</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
-        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-family: 'Varela+Round', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-family: 'Varela Round', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; color: #333;}
         .container { background-color: rgba(255, 255, 255, 0.9); padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); max-width: 90%; width: 450px; }
-        h1 { color: #333; font-size: 1.8rem; margin-bottom: 20px; }
+        h1 { font-size: 1.8rem; margin-bottom: 20px; }
         .gif { width: 150px; height: 150px; object-fit: cover; border-radius: 50%; margin-bottom: 25px; border: 4px solid #fff; }
         input[type="date"] { width: 80%; padding: 15px; border-radius: 10px; border: 2px solid #ddd; font-size: 1.2rem; text-align: center; margin-bottom: 20px;}
         .button, .option-btn { background-color: #6a11cb; color: white; border: none; padding: 15px; width: 100%; font-size: 1.1rem; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; font-weight: bold; margin-top: 10px; }
         .button:hover, .option-btn:hover { background-color: #2575fc; }
-        .email-button { background-color: #007bff; margin-top: 20px; } /* Yeni buton için stil */
-        .email-button:hover { background-color: #0056b3; }
         #sonuc-container h1 { color: #4caf50; }
         #sonuc-container.yanlis h1 { color: #f44336; }
     </style>
 </head>
 <body>
-    <div class="container" id="quiz-bolumu-1">
-        <h1>İlk Soru: İlk Buluşma Tarihimiz?</h1>
-        <img src="ana.gif" alt="Ana GIF" class="gif">
-        <input type="date" id="cevap-input-1">
-        <button class="button" onclick="soru1Kontrol()">Sıradaki Soru</button>
+    <div id="ana-container">
+        <!-- Quiz bölümleri buraya yüklenecek -->
     </div>
 
-    <div class="container" id="quiz-bolumu-2" style="display:none;">
-        <h1 id="soru2-baslik">İkinci Soru Geliyor...</h1>
-        <img src="ana.gif" alt="Ana GIF" class="gif">
-        <div id="secenekler-kutusu"></div>
-    </div>
-
-    <div class="container" id="sonuc-container" style="display:none;">
-        <h1 id="sonuc-baslik">SONUÇ</h1>
-        <p id="sonuc-mesaj"></p>
-        <img id="sonuc-gif" src="" alt="Sonuç GIF" class="gif">
-        <button class="button email-button" id="email-gonder-butonu" style="display:none;">Cevapları E-posta ile Gönder</button>
-    </div>
+    <!-- Firebase Kütüphaneleri -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        let quizVerisi;
-        let kullaniciCevaplari = {};
-
-        window.onload = function() {
-            try {
-                const sifreliVeri = window.location.hash.substring(1);
-                if (!sifreliVeri) throw new Error("Quiz verisi bulunamadı!");
-                const veriStr = decodeURIComponent(sifreliVeri);
-                quizVerisi = JSON.parse(veriStr);
-
-                document.getElementById('soru2-baslik').textContent = quizVerisi.soru2_metin;
-                const seceneklerKutusu = document.getElementById('secenekler-kutusu');
-                quizVerisi.secenekler.forEach((secenek, index) => {
-                    const buton = document.createElement('button');
-                    buton.textContent = secenek;
-                    buton.classList.add('option-btn');
-                    buton.onclick = () => soru2Kontrol(index);
-                    seceneklerKutusu.appendChild(buton);
-                });
-
-            } catch (error) {
-                document.body.innerHTML = '<h1>Hatalı veya eksik link! Lütfen linki kontrol et.</h1>';
-                console.error(error);
-            }
+        // Senin özel Firebase anahtarların buraya eklendi.
+        const firebaseConfig = {
+            apiKey: "AIzaSyAP3bZR_QQqJ8LqToEU1mdTtd5rfuoMaVY",
+            authDomain: "sevgili-quizi.firebaseapp.com",
+            databaseURL: "https://sevgili-quizi-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "sevgili-quizi",
+            storageBucket: "sevgili-quizi.firebasestorage.app",
+            messagingSenderId: "753855520594",
+            appId: "1:753855520594:web:0eeb1d98eb3cdc1e21e48b"
         };
 
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let quizVerisi;
+        let kullaniciCevaplari = {};
+        const anaContainer = document.getElementById('ana-container');
+
+        window.onload = function() {
+            const quizId = window.location.hash.substring(1);
+            if (!quizId) {
+                anaContainer.innerHTML = '<h1>Hatalı Link!</h1>';
+                return;
+            }
+            
+            const quizRef = database.ref('quizzes/' + quizId);
+            quizRef.once('value').then((snapshot) => {
+                if (!snapshot.exists()) {
+                    anaContainer.innerHTML = '<h1>Böyle bir quiz bulunamadı!</h1>';
+                    return;
+                }
+                quizVerisi = snapshot.val();
+                soru1Goster();
+            });
+        };
+        
+        function soru1Goster() {
+            anaContainer.innerHTML = `
+                <div class="container" id="quiz-bolumu-1">
+                    <h1>İlk Soru: İlk Buluşma Tarihimiz?</h1>
+                    <img src="ana.gif" alt="Ana GIF" class="gif">
+                    <input type="date" id="cevap-input-1">
+                    <button class="button" onclick="soru1Kontrol()">Sıradaki Soru</button>
+                </div>`;
+        }
+        
         function soru1Kontrol() {
             const cevap1 = document.getElementById('cevap-input-1').value;
             if (!cevap1) { alert("Lütfen bir tarih seç!"); return; }
             kullaniciCevaplari.soru1 = cevap1;
-            document.getElementById('quiz-bolumu-1').style.display = 'none';
-            document.getElementById('quiz-bolumu-2').style.display = 'block';
+            soru2Goster();
+        }
+
+        function soru2Goster() {
+            let secenekButonlari = '';
+            quizVerisi.secenekler.forEach((secenek, index) => {
+                secenekButonlari += `<button class="option-btn" onclick="soru2Kontrol(${index})">${secenek}</button>`;
+            });
+
+            anaContainer.innerHTML = `
+                <div class="container" id="quiz-bolumu-2">
+                    <h1>${quizVerisi.soru2_metin}</h1>
+                    <img src="ana.gif" alt="Ana GIF" class="gif">
+                    <div id="secenekler-kutusu">${secenekButonlari}</div>
+                </div>`;
         }
 
         function soru2Kontrol(secilenIndex) {
             kullaniciCevaplari.soru2 = secilenIndex;
-            document.getElementById('quiz-bolumu-2').style.display = 'none';
+            
+            database.ref('quizzes/' + window.location.hash.substring(1) + '/cevaplar').set(kullaniciCevaplari);
+
             sonuclariGoster();
         }
 
         function sonuclariGoster() {
-            const sonucContainer = document.getElementById('sonuc-container');
-            const sonucBaslik = document.getElementById('sonuc-baslik');
-            const sonucMesaj = document.getElementById('sonuc-mesaj');
-            const sonucGif = document.getElementById('sonuc-gif');
-            
             const dogruCevap1 = quizVerisi.soru1_cevap;
             const dogruCevap2_index = parseInt(quizVerisi.soru2_dogru_index);
+            let sonucHTML = '';
 
-            // Cevapları karşılaştır ve sonucu ekrana yaz
             if (kullaniciCevaplari.soru1 === dogruCevap1 && kullaniciCevaplari.soru2 === dogruCevap2_index) {
-                sonucBaslik.textContent = "TEBRİKLER AŞKIM!";
-                sonucMesaj.textContent = "Tüm anılarımızı hatırlamana o kadar sevindim ki... Sen harikasın!";
-                sonucGif.src = 'dogru.gif';
+                sonucHTML = `
+                    <div class="container" id="sonuc-container">
+                        <h1>TEBRİKLER AŞKIM!</h1>
+                        <p>Tüm anılarımızı hatırlamana o kadar sevindim ki... Sen harikasın!</p>
+                        <img src="dogru.gif" alt="Doğru Cevap GIF" class="gif">
+                    </div>`;
             } else {
-                sonucContainer.classList.add('yanlis');
-                sonucBaslik.textContent = "BİRAZCIK UNUTMUŞUZ SANKİ...";
-                sonucMesaj.textContent = "Olsun, aşkımız her şeyden önemli. Gel birlikte yeni anılar biriktirelim!";
-                sonucGif.src = 'yanlis.gif';
+                sonucHTML = `
+                    <div class="container" id="sonuc-container" class="yanlis">
+                        <h1>BİRAZCIK UNUTMUŞUZ SANKİ...</h1>
+                        <p>Olsun, aşkımız her şeyden önemli. Gel birlikte yeni anılar biriktirelim!</p>
+                        <img src="yanlis.gif" alt="Yanlış Cevap GIF" class="gif">
+                    </div>`;
             }
-            sonucContainer.style.display = 'block';
-
-            // --- YENİ EKLENEN MAILTO LOGIĞI ---
-            // 1. E-posta içeriğini oluştur
-            const emailAdresi = quizVerisi.creator_email;
-            const konu = "Hazırladığın Quiz Çözüldü!";
-            const govde = `Merhaba,\n\nHazırladığın quiz için verilen cevaplar aşağıdadır:\n\nSoru 1: İlk Buluşma Tarihimiz?\nVerilen Cevap: ${kullaniciCevaplari.soru1}\nDoğru Cevap: ${dogruCevap1}\n\nSoru 2: ${quizVerisi.soru2_metin}\nVerilen Cevap: ${quizVerisi.secenekler[kullaniciCevaplari.soru2]}\nDoğru Cevap: ${quizVerisi.secenekler[dogruCevap2_index]}\n\nHarika bir gün geçirmen dileğiyle!\n`;
-
-            // 2. mailto linkini hazırla
-            const mailtoLinki = `mailto:${emailAdresi}?subject=${encodeURIComponent(konu)}&body=${encodeURIComponent(govde)}`;
-
-            // 3. Butonu bul, görünür yap ve tıklama olayını ata
-            const emailButonu = document.getElementById('email-gonder-butonu');
-            emailButonu.style.display = 'block';
-            emailButonu.onclick = function() {
-                window.location.href = mailtoLinki;
-            };
-            // --- BİTTİ ---
+            anaContainer.innerHTML = sonucHTML;
         }
     </script>
 </body>
