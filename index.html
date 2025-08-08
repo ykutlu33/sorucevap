@@ -11,7 +11,7 @@
         h1 { text-align: center; color: #1877f2; }
         .input-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
-        input[type="text"], input[type="date"] { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #ddd; box-sizing: border-box;}
+        input[type="text"], input[type="date"], input[type="email"] { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #ddd; box-sizing: border-box;}
         .options-container .option { display: flex; align-items: center; margin-bottom: 10px; }
         .options-container .option input[type="text"] { flex-grow: 1; margin-right: 10px;}
         .button { background-color: #1877f2; color: white; border: none; padding: 15px; width: 100%; font-size: 1.2rem; border-radius: 6px; cursor: pointer; transition: background-color 0.3s; }
@@ -23,14 +23,22 @@
 <body>
     <div class="form-container">
         <h1>Sevgiline Özel Quiz Hazırla</h1>
+        
+        <div class="input-group">
+            <label for="creator_email">Cevapların Gönderileceği E-posta Adresin</label>
+            <input type="email" id="creator_email" placeholder="E-posta adresini buraya yaz..." required>
+        </div>
+
         <div class="input-group">
             <label for="soru1_cevap">Soru 1: İlk buluşma tarihinizi seçin (Doğru Cevap)</label>
             <input type="date" id="soru1_cevap" required>
         </div>
+
         <div class="input-group">
             <label for="soru2_metin">Soru 2: İkinci soruyu yazın (Örn: O gün üstümde ne vardı?)</label>
             <input type="text" id="soru2_metin" placeholder="Soruyu buraya yazın..." required>
         </div>
+
         <div class="input-group">
             <label>Soru 2'nin Cevap Seçenekleri (Birini doğru cevap olarak işaretleyin)</label>
             <div class="options-container">
@@ -40,15 +48,19 @@
                 <div class="option"><input type="radio" name="dogru_secenek" value="3"> <input type="text" id="secenek4" placeholder="Seçenek 4" required></div>
             </div>
         </div>
+
         <button class="button" onclick="linkOlustur()">Quiz Linkini Oluştur</button>
+
         <div id="link-sonuc">
             <p>Harika! İşte sevgiline göndereceğin link. Kopyalayıp ona gönder:</p>
             <a href="#" id="olusturulan-link" target="_blank"></a>
         </div>
     </div>
+
     <script>
         function linkOlustur() {
             const quizVerisi = {
+                creator_email: document.getElementById('creator_email').value,
                 soru1_cevap: document.getElementById('soru1_cevap').value,
                 soru2_metin: document.getElementById('soru2_metin').value,
                 secenekler: [
@@ -59,19 +71,18 @@
                 ],
                 soru2_dogru_index: document.querySelector('input[name="dogru_secenek"]:checked').value
             };
-            if (!quizVerisi.soru1_cevap || !quizVerisi.soru2_metin || quizVerisi.secenekler.some(s => s === '')) {
+
+            if (!quizVerisi.creator_email || !quizVerisi.soru1_cevap || !quizVerisi.soru2_metin || quizVerisi.secenekler.some(s => s === '')) {
                 alert('Lütfen tüm alanları doldurun!');
                 return;
             }
-            const veriStr = JSON.stringify(quizVerisi);
-            
-            // --- YENİ VE GÜVENİLİR YÖNTEM ---
-            // btoa() fonksiyonu kaldırıldı. Direkt olarak link için güvenli hale getiriliyor.
-            const sifreliVeri = encodeURIComponent(veriStr);
-            // --- BİTTİ ---
 
+            const veriStr = JSON.stringify(quizVerisi);
+            const sifreliVeri = encodeURIComponent(veriStr);
+            
             const anaAdres = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
             const quizLinki = anaAdres + 'quiz.html#' + sifreliVeri;
+
             const linkAlani = document.getElementById('olusturulan-link');
             linkAlani.href = quizLinki;
             linkAlani.textContent = quizLinki;
