@@ -8,39 +8,31 @@
         @import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
         body { background-color: #f0f2f5; font-family: 'Varela Round', sans-serif; display: flex; justify-content: center; padding: 40px;}
         .form-container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 600px; width: 100%;}
-        h1 { text-align: center; color: #1877f2; }
+        h1 { text-align: center; color: #4a00e0; }
         .input-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
-        input[type="text"], input[type="date"], input[type="email"] { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #ddd; box-sizing: border-box;}
+        input[type="text"], input[type="date"] { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #ddd; box-sizing: border-box;}
         .options-container .option { display: flex; align-items: center; margin-bottom: 10px; }
         .options-container .option input[type="text"] { flex-grow: 1; margin-right: 10px;}
-        .button { background-color: #1877f2; color: white; border: none; padding: 15px; width: 100%; font-size: 1.2rem; border-radius: 6px; cursor: pointer; transition: background-color 0.3s; }
-        .button:hover { background-color: #166fe5; }
-        #link-sonuc { margin-top: 20px; padding: 15px; background-color: #e7f3ff; border: 1px solid #1877f2; border-radius: 6px; text-align: center; display: none; }
-        #link-sonuc a { color: #1877f2; font-weight: bold; word-wrap: break-word; }
+        .button { background: linear-gradient(to right, #8e2de2, #4a00e0); color: white; border: none; padding: 15px; width: 100%; font-size: 1.2rem; border-radius: 6px; cursor: pointer; transition: opacity 0.3s; }
+        #link-sonuc { margin-top: 20px; padding: 15px; background-color: #f3e8ff; border: 1px solid #8e2de2; border-radius: 6px; text-align: center; display: none; }
+        #link-sonuc p { font-weight: bold; }
+        #link-sonuc a { color: #4a00e0; word-wrap: break-word; }
     </style>
 </head>
 <body>
     <div class="form-container">
         <h1>Sevgiline Özel Quiz Hazırla</h1>
-        
-        <div class="input-group">
-            <label for="creator_email">Cevapların Gönderileceği E-posta Adresin</label>
-            <input type="email" id="creator_email" placeholder="E-posta adresini buraya yaz..." required>
-        </div>
-
         <div class="input-group">
             <label for="soru1_cevap">Soru 1: İlk buluşma tarihinizi seçin (Doğru Cevap)</label>
             <input type="date" id="soru1_cevap" required>
         </div>
-
         <div class="input-group">
-            <label for="soru2_metin">Soru 2: İkinci soruyu yazın (Örn: O gün üstümde ne vardı?)</label>
-            <input type="text" id="soru2_metin" placeholder="Soruyu buraya yazın..." required>
+            <label for="soru2_metin">Soru 2: İkinci soruyu yazın</label>
+            <input type="text" id="soru2_metin" placeholder="Örn: O gün üstümde ne vardı?" required>
         </div>
-
         <div class="input-group">
-            <label>Soru 2'nin Cevap Seçenekleri (Birini doğru cevap olarak işaretleyin)</label>
+            <label>Soru 2'nin Cevap Seçenekleri (Birini doğru cevap olarak işaretle)</label>
             <div class="options-container">
                 <div class="option"><input type="radio" name="dogru_secenek" value="0" checked> <input type="text" id="secenek1" placeholder="Seçenek 1" required></div>
                 <div class="option"><input type="radio" name="dogru_secenek" value="1"> <input type="text" id="secenek2" placeholder="Seçenek 2" required></div>
@@ -48,19 +40,39 @@
                 <div class="option"><input type="radio" name="dogru_secenek" value="3"> <input type="text" id="secenek4" placeholder="Seçenek 4" required></div>
             </div>
         </div>
-
-        <button class="button" onclick="linkOlustur()">Quiz Linkini Oluştur</button>
-
+        <button class="button" onclick="linkOlustur()">Quiz Linklerini Oluştur</button>
         <div id="link-sonuc">
-            <p>Harika! İşte sevgiline göndereceğin link. Kopyalayıp ona gönder:</p>
-            <a href="#" id="olusturulan-link" target="_blank"></a>
+            <p>Quiz Hazır! Linkleri Kopyala:</p>
+            <strong>Sevgiline Göndereceğin Link:</strong><br>
+            <a href="#" id="quiz-linki" target="_blank"></a>
+            <hr>
+            <strong>Sonuçları Bekleyeceğin Link (Bu Sende Kalacak):</strong><br>
+            <a href="#" id="bekleme-linki" target="_blank"></a>
         </div>
     </div>
 
+    <!-- Firebase Kütüphaneleri -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <script>
+        // Senin özel Firebase anahtarların buraya eklendi.
+        const firebaseConfig = {
+            apiKey: "AIzaSyAP3bZR_QQqJ8LqToEU1mdTtd5rfuoMaVY",
+            authDomain: "sevgili-quizi.firebaseapp.com",
+            databaseURL: "https://sevgili-quizi-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "sevgili-quizi",
+            storageBucket: "sevgili-quizi.firebasestorage.app",
+            messagingSenderId: "753855520594",
+            appId: "1:753855520594:web:0eeb1d98eb3cdc1e21e48b"
+        };
+
+        // Firebase'i başlat
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         function linkOlustur() {
             const quizVerisi = {
-                creator_email: document.getElementById('creator_email').value,
                 soru1_cevap: document.getElementById('soru1_cevap').value,
                 soru2_metin: document.getElementById('soru2_metin').value,
                 secenekler: [
@@ -72,20 +84,24 @@
                 soru2_dogru_index: document.querySelector('input[name="dogru_secenek"]:checked').value
             };
 
-            if (!quizVerisi.creator_email || !quizVerisi.soru1_cevap || !quizVerisi.soru2_metin || quizVerisi.secenekler.some(s => s === '')) {
+            if (!quizVerisi.soru1_cevap || !quizVerisi.soru2_metin || quizVerisi.secenekler.some(s => s === '')) {
                 alert('Lütfen tüm alanları doldurun!');
                 return;
             }
 
-            const veriStr = JSON.stringify(quizVerisi);
-            const sifreliVeri = encodeURIComponent(veriStr);
-            
-            const anaAdres = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-            const quizLinki = anaAdres + 'quiz.html#' + sifreliVeri;
+            const yeniQuizRef = database.ref('quizzes').push();
+            yeniQuizRef.set(quizVerisi);
 
-            const linkAlani = document.getElementById('olusturulan-link');
-            linkAlani.href = quizLinki;
-            linkAlani.textContent = quizLinki;
+            const quizId = yeniQuizRef.key; 
+
+            const anaAdres = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+            const quizLinki = anaAdres + 'quiz.html#' + quizId;
+            const beklemeLinki = anaAdres + 'bekle.html#' + quizId;
+
+            document.getElementById('quiz-linki').href = quizLinki;
+            document.getElementById('quiz-linki').textContent = quizLinki;
+            document.getElementById('bekleme-linki').href = beklemeLinki;
+            document.getElementById('bekleme-linki').textContent = beklemeLinki;
             document.getElementById('link-sonuc').style.display = 'block';
         }
     </script>
