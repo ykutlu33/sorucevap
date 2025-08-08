@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sana Özel Bir Sınav!</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-family: 'Varela Round', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+        .container { background-color: rgba(255, 255, 255, 0.9); padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); max-width: 90%; width: 450px; }
+        h1 { color: #333; font-size: 1.8rem; margin-bottom: 20px; }
+        .gif { width: 150px; height: 150px; object-fit: cover; border-radius: 50%; margin-bottom: 25px; border: 4px solid #fff; }
+        input[type="date"] { width: 80%; padding: 15px; border-radius: 10px; border: 2px solid #ddd; font-size: 1.2rem; text-align: center; margin-bottom: 20px;}
+        .button, .option-btn { background-color: #6a11cb; color: white; border: none; padding: 15px; width: 100%; font-size: 1.1rem; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; font-weight: bold; margin-top: 10px; }
+        .button:hover, .option-btn:hover { background-color: #2575fc; }
+        #sonuc-container h1 { color: #4caf50; }
+        #sonuc-container.yanlis h1 { color: #f44336; }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="quiz-bolumu-1">
+        <h1>İlk Soru: İlk Buluşma Tarihimiz?</h1>
+        <img src="ana.gif" alt="Ana GIF" class="gif">
+        <input type="date" id="cevap-input-1">
+        <button class="button" onclick="soru1Kontrol()">Sıradaki Soru</button>
+    </div>
+
+    <div class="container" id="quiz-bolumu-2" style="display:none;">
+        <h1 id="soru2-baslik">İkinci Soru Geliyor...</h1>
+        <img src="ana.gif" alt="Ana GIF" class="gif">
+        <div id="secenekler-kutusu">
+            </div>
+    </div>
+
+    <div class="container" id="sonuc-container" style="display:none;">
+        <h1 id="sonuc-baslik">SONUÇ</h1>
+        <p id="sonuc-mesaj"></p>
+        <img id="sonuc-gif" src="" alt="Sonuç GIF" class="gif">
+    </div>
+
+    <script>
+        let quizVerisi;
+        let kullaniciCevaplari = {};
+
+        // Sayfa yüklendiğinde linkteki şifreyi çöz ve quizi hazırla
+        window.onload = function() {
+            try {
+                // Linkin sonundaki şifreli veriyi al
+                const sifreliVeri = window.location.hash.substring(1);
+                if (!sifreliVeri) throw new Error("Quiz verisi bulunamadı!");
+
+                // Şifreyi çözerek orijinal veriye ulaş
+                const veriStr = atob(sifreliVeri);
+                quizVerisi = JSON.parse(veriStr);
+
+                // İkinci sorunun başlığını ve seçeneklerini hazırla
+                document.getElementById('soru2-baslik').textContent = quizVerisi.soru2_metin;
+                const seceneklerKutusu = document.getElementById('secenekler-kutusu');
+                quizVerisi.secenekler.forEach((secenek, index) => {
+                    const buton = document.createElement('button');
+                    buton.textContent = secenek;
+                    buton.classList.add('option-btn');
+                    buton.onclick = () => soru2Kontrol(index);
+                    seceneklerKutusu.appendChild(buton);
+                });
+
+            } catch (error) {
+                document.body.innerHTML = '<h1>Hatalı veya eksik link! Lütfen linki kontrol et.</h1>';
+                console.error(error);
+            }
+        };
+
+        // İlk sorunun cevabını kontrol et
+        function soru1Kontrol() {
+            const cevap1 = document.getElementById('cevap-input-1').value;
+            if (!cevap1) {
+                alert("Lütfen bir tarih seç!");
+                return;
+            }
+            kullaniciCevaplari.soru1 = cevap1;
+            document.getElementById('quiz-bolumu-1').style.display = 'none';
+            document.getElementById('quiz-bolumu-2').style.display = 'block';
+        }
+
+        // İkinci sorunun cevabını al ve sonuçları göster
+        function soru2Kontrol(secilenIndex) {
+            kullaniciCevaplari.soru2 = secilenIndex;
+            document.getElementById('quiz-bolumu-2').style.display = 'none';
+            sonuclariGoster();
+        }
+
+        // Sonuçları ekranda göster
+        function sonuclariGoster() {
+            const sonucContainer = document.getElementById('sonuc-container');
+            const sonucBaslik = document.getElementById('sonuc-baslik');
+            const sonucMesaj = document.getElementById('sonuc-mesaj');
+            const sonucGif = document.getElementById('sonuc-gif');
+
+            const dogruCevap1 = quizVerisi.soru1_cevap;
+            const dogruCevap2_index = parseInt(quizVerisi.soru2_dogru_index);
+            
+            // Cevapları karşılaştır
+            if (kullaniciCevaplari.soru1 === dogruCevap1 && kullaniciCevaplari.soru2 === dogruCevap2_index) {
+                // Her şey doğruysa
+                sonucContainer.classList.remove('yanlis');
+                sonucBaslik.textContent = "TEBRİKLER AŞKIM!";
+                sonucMesaj.textContent = "Tüm anılarımızı hatırlamana o kadar sevindim ki... Sen harikasın!";
+                sonucGif.src = 'dogru.gif';
+            } else {
+                // En az bir yanlış varsa
+                sonucContainer.classList.add('yanlis');
+                sonucBaslik.textContent = "BİRAZCIK UNUTMUŞUZ SANKİ...";
+                sonucMesaj.textContent = "Olsun, aşkımız her şeyden önemli. Gel birlikte yeni anılar biriktirelim!";
+                sonucGif.src = 'yanlis.gif';
+            }
+            sonucContainer.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

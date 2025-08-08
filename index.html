@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sana Özel Quiz Oluştur</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
+        body { background-color: #f0f2f5; font-family: 'Varela Round', sans-serif; display: flex; justify-content: center; padding: 40px;}
+        .form-container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 600px; width: 100%;}
+        h1 { text-align: center; color: #1877f2; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        input[type="text"], input[type="date"] { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #ddd; box-sizing: border-box;}
+        .options-container .option { display: flex; align-items: center; margin-bottom: 10px; }
+        .options-container .option input[type="text"] { flex-grow: 1; margin-right: 10px;}
+        .button { background-color: #1877f2; color: white; border: none; padding: 15px; width: 100%; font-size: 1.2rem; border-radius: 6px; cursor: pointer; transition: background-color 0.3s; }
+        .button:hover { background-color: #166fe5; }
+        #link-sonuc { margin-top: 20px; padding: 15px; background-color: #e7f3ff; border: 1px solid #1877f2; border-radius: 6px; text-align: center; display: none; }
+        #link-sonuc a { color: #1877f2; font-weight: bold; word-wrap: break-word; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Sevgiline Özel Quiz Hazırla</h1>
+        
+        <div class="input-group">
+            <label for="soru1_cevap">Soru 1: İlk buluşma tarihinizi seçin (Doğru Cevap)</label>
+            <input type="date" id="soru1_cevap" required>
+        </div>
+
+        <div class="input-group">
+            <label for="soru2_metin">Soru 2: İkinci soruyu yazın (Örn: O gün üstümde ne vardı?)</label>
+            <input type="text" id="soru2_metin" placeholder="Soruyu buraya yazın..." required>
+        </div>
+
+        <div class="input-group">
+            <label>Soru 2'nin Cevap Seçenekleri (Birini doğru cevap olarak işaretleyin)</label>
+            <div class="options-container">
+                <div class="option"><input type="radio" name="dogru_secenek" value="0" checked> <input type="text" id="secenek1" placeholder="Seçenek 1" required></div>
+                <div class="option"><input type="radio" name="dogru_secenek" value="1"> <input type="text" id="secenek2" placeholder="Seçenek 2" required></div>
+                <div class="option"><input type="radio" name="dogru_secenek" value="2"> <input type="text" id="secenek3" placeholder="Seçenek 3" required></div>
+                <div class="option"><input type="radio" name="dogru_secenek" value="3"> <input type="text" id="secenek4" placeholder="Seçenek 4" required></div>
+            </div>
+        </div>
+
+        <button class="button" onclick="linkOlustur()">Quiz Linkini Oluştur</button>
+
+        <div id="link-sonuc">
+            <p>Harika! İşte sevgiline göndereceğin link. Kopyalayıp ona gönder:</p>
+            <a href="#" id="olusturulan-link" target="_blank"></a>
+        </div>
+    </div>
+
+    <script>
+        function linkOlustur() {
+            // Formdaki tüm verileri topla
+            const quizVerisi = {
+                soru1_cevap: document.getElementById('soru1_cevap').value,
+                soru2_metin: document.getElementById('soru2_metin').value,
+                secenekler: [
+                    document.getElementById('secenek1').value,
+                    document.getElementById('secenek2').value,
+                    document.getElementById('secenek3').value,
+                    document.getElementById('secenek4').value,
+                ],
+                soru2_dogru_index: document.querySelector('input[name="dogru_secenek"]:checked').value
+            };
+
+            // Herhangi bir alan boş mu diye kontrol et
+            if (!quizVerisi.soru1_cevap || !quizVerisi.soru2_metin || quizVerisi.secenekler.some(s => s === '')) {
+                alert('Lütfen tüm alanları doldurun!');
+                return;
+            }
+
+            // Veriyi metne (JSON) çevir
+            const veriStr = JSON.stringify(quizVerisi);
+            // Metni Base64 formatında şifrele
+            const sifreliVeri = btoa(veriStr);
+
+            // Şu anki sayfanın adresini al ve 'quiz.html' ile değiştir
+            const mevcutAdres = window.location.href;
+            const anaAdres = mevcutAdres.substring(0, mevcutAdres.lastIndexOf('/') + 1);
+            const quizLinki = anaAdres + 'quiz.html#' + sifreliVeri;
+
+            // Oluşturulan linki ekranda göster
+            const linkAlani = document.getElementById('olusturulan-link');
+            linkAlani.href = quizLinki;
+            linkAlani.textContent = quizLinki;
+            document.getElementById('link-sonuc').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
