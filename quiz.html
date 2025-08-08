@@ -24,37 +24,26 @@
         <input type="date" id="cevap-input-1">
         <button class="button" onclick="soru1Kontrol()">Sıradaki Soru</button>
     </div>
-
     <div class="container" id="quiz-bolumu-2" style="display:none;">
         <h1 id="soru2-baslik">İkinci Soru Geliyor...</h1>
         <img src="ana.gif" alt="Ana GIF" class="gif">
         <div id="secenekler-kutusu"></div>
     </div>
-
     <div class="container" id="sonuc-container" style="display:none;">
         <h1 id="sonuc-baslik">SONUÇ</h1>
         <p id="sonuc-mesaj"></p>
         <img id="sonuc-gif" src="" alt="Sonuç GIF" class="gif">
     </div>
-
     <script>
         let quizVerisi;
         let kullaniciCevaplari = {};
-
         window.onload = function() {
             try {
                 const sifreliVeri = window.location.hash.substring(1);
                 if (!sifreliVeri) throw new Error("Quiz verisi bulunamadı!");
-
-                // --- GÜNCELLEME: Türkçe karakter sorununu çözmek için ---
-                // Önce şifreyi çözerek ara formattaki metni al
-                const cozulmusVeriStr = atob(sifreliVeri);
-                // Sonra bu metni, Türkçe karakterleri destekleyen orijinal haline geri çevir
-                const veriStr = decodeURIComponent(escape(cozulmusVeriStr));
-                // --- GÜNCELLEME SONU ---
-                
+                // GÜNCELLENMİŞ GÜVENLİ ŞİFRE ÇÖZME
+                const veriStr = decodeURIComponent(escape(atob(sifreliVeri)));
                 quizVerisi = JSON.parse(veriStr);
-
                 document.getElementById('soru2-baslik').textContent = quizVerisi.soru2_metin;
                 const seceneklerKutusu = document.getElementById('secenekler-kutusu');
                 quizVerisi.secenekler.forEach((secenek, index) => {
@@ -64,13 +53,11 @@
                     buton.onclick = () => soru2Kontrol(index);
                     seceneklerKutusu.appendChild(buton);
                 });
-
             } catch (error) {
                 document.body.innerHTML = '<h1>Hatalı veya eksik link! Lütfen linki kontrol et.</h1>';
                 console.error(error);
             }
         };
-
         function soru1Kontrol() {
             const cevap1 = document.getElementById('cevap-input-1').value;
             if (!cevap1) {
@@ -81,23 +68,19 @@
             document.getElementById('quiz-bolumu-1').style.display = 'none';
             document.getElementById('quiz-bolumu-2').style.display = 'block';
         }
-
         function soru2Kontrol(secilenIndex) {
             kullaniciCevaplari.soru2 = secilenIndex;
             document.getElementById('quiz-bolumu-2').style.display = 'none';
             sonuclariGoster();
         }
-
         function sonuclariGoster() {
             const sonucContainer = document.getElementById('sonuc-container');
             const sonucBaslik = document.getElementById('sonuc-baslik');
             const sonucMesaj = document.getElementById('sonuc-mesaj');
             const sonucGif = document.getElementById('sonuc-gif');
-
             const dogruCevap1 = quizVerisi.soru1_cevap;
             const dogruCevap2_index = parseInt(quizVerisi.soru2_dogru_index);
-            
-            if (kullaniciCevaplari.soru1 === dogruCavap1 && kullaniciCevaplari.soru2 === dogruCevap2_index) {
+            if (kullaniciCevaplari.soru1 === dogruCevap1 && kullaniciCevaplari.soru2 === dogruCevap2_index) {
                 sonucContainer.classList.remove('yanlis');
                 sonucBaslik.textContent = "TEBRİKLER AŞKIM!";
                 sonucMesaj.textContent = "Tüm anılarımızı hatırlamana o kadar sevindim ki... Sen harikasın!";
